@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-import { NASAKEY } from "../../config";
-import CustomGoogleMap from "../../component/google-map/google.map.component";
-import NasaMap from "../../component//nasa-map/nasa-map.component";
+import { getLocations, getNasaMap } from "../api/api";
+
+import CustomGoogleMap from "../component/google-map/google.map.component";
+import NasaMap from "../component/nasa-map/nasa-map.component";
 
 const Page = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -87,12 +88,12 @@ const Page = () => {
    * @param {String} cityName
    */
   function searchLocations(cityName) {
-    fetch(
-      `https://nominatim.openstreetmap.org/search?city=${cityName}&format=json`
-    )
-      .then((response) => response.json())
+    getLocations(cityName)
       .then((data) => {
         setOption(data);
+      })
+      .catch(() => {
+        console.error("Wystąpił błąd");
       });
   }
 
@@ -100,13 +101,14 @@ const Page = () => {
    * @param {Object} sercherData
    */
   function searchForNasaMap(sercherData) {
-    fetch(
-      `https://api.nasa.gov/planetary/earth/assets?lon=${sercherData.lon}&lat=${sercherData.lat}&dim=0.20&api_key=${NASAKEY}`
-    )
-      .then((data) => data.json())
+    getNasaMap(sercherData)
       .then((data) => {
         setMapData({ ...sercherData, ...data });
+      })
+      .catch(() => {
+        console.error("Wystąpił błąd");
       });
   }
 };
+
 export default Page;

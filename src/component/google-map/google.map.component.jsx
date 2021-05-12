@@ -7,7 +7,7 @@ import {
 const CustomGoogleMap = ({ lat, lon }) => {
   return (
     <GoogleMap
-      defaultZoom={8}
+      defaultZoom={10}
       defaultCenter={{ lat: Number(lat), lng: Number(lon) }}
     ></GoogleMap>
   );
