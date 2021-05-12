@@ -1,17 +1,14 @@
 import { useState } from "react";
+import { NASAKEY } from "../../config";
 
 const Page = () => {
   const [searchValue, setSearchValue] = useState("");
-  const [options, setOption] = useState([
-    { place_id: 1, display_name: "test" },
-    { place_id: 2, display_name: "test22" },
-    { place_id: 3, display_name: "test123123" },
-    { place_id: 4, display_name: "xddd" },
-  ]);
+  const [options, setOption] = useState([]);
+  const [nasaMaplink, setNasaMapLink] = useState("");
 
   return (
     <>
-      <label for="searcherInput" className="form-label">
+      <label htmlFor="searcherInput" className="form-label">
         Wyszukaj lokacje
       </label>
       <input
@@ -28,24 +25,51 @@ const Page = () => {
           <option key={item.place_id} value={item.display_name} />
         ))}
       </datalist>
+
+      {nasaMaplink ? (
+        <>
+          <img src={nasaMaplink.url} />
+        </>
+      ) : null}
     </>
   );
 
   function onChangeSearcher(e) {
-    setSearchValue(e.target.value);
-    searchLocations(e.target.value);
+    const value = e.target.value;
+    const selectedItem = options.find((item) => item.display_name === value);
+
+    if (selectedItem) {
+      searchForNasaMap(selectedItem);
+    } else {
+      setSearchValue(value);
+      searchLocations(value);
+    }
   }
 
-  function searchLocations(value) {
+  /**
+   * @param {String} cityName
+   */
+  function searchLocations(cityName) {
     fetch(
-      `https://nominatim.openstreetmap.org/search?city=${value}&format=json`
+      `https://nominatim.openstreetmap.org/search?city=${cityName}&format=json`
     )
-      .then((data) => data.json())
+      .then((response) => response.json())
       .then((data) => {
         setOption(data);
       });
-    console.log(value);
+  }
+
+  /**
+   * @param {Object} sercherData
+   */
+  function searchForNasaMap(sercherData) {
+    fetch(
+      `https://api.nasa.gov/planetary/earth/assets?lon=${sercherData.lon}&lat=${sercherData.lat}&dim=0.20&api_key=${NASAKEY}`
+    )
+      .then((data) => data.json())
+      .then((data) => {
+        setNasaMapLink(data);
+      });
   }
 };
-
 export default Page;
