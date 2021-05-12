@@ -1,11 +1,14 @@
 import { useState } from "react";
+
 import { NASAKEY } from "../../config";
+import CustomGoogleMap from "../../component/google-map/google.map.component";
+import NasaMap from "../../component//nasa-map/nasa-map.component";
 
 const Page = () => {
   const [searchValue, setSearchValue] = useState("");
   const [options, setOption] = useState([]);
-  const [nasaMaplink, setNasaMapLink] = useState("");
-  const [isNasaImageLoader, setIsNasaImageLoader] = useState(true);
+  const [mapData, setMapData] = useState("");
+
   return (
     <>
       <div className="container">
@@ -38,34 +41,26 @@ const Page = () => {
         <div className="row p-2">
           <div className="col">
             <h2>Mapa NASA</h2>
-            {nasaMaplink ? (
-              <>
-                <figure className="figure">
-                  <img
-                    src={nasaMaplink.url}
-                    className="figure-img img-fluid rounded"
-                    alt="Zdjęcie satelitarne"
-                    onLoad={() => {
-                      setIsNasaImageLoader(false);
-                    }}
-                  />
-                  {isNasaImageLoader ? (
-                    <div class="d-flex justify-content-center">
-                      <div className="spinner-border" id="nasaImageLoader">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <figcaption className="figure-caption text-end">
-                    Zdjęcie satelitarne {searchValue}.
-                  </figcaption>
-                </figure>
-              </>
-            ) : null}
+            {mapData ? (
+              <NasaMap name={searchValue} {...mapData} />
+            ) : (
+              <p>Wybierz lokację, by zobaczyć mapę</p>
+            )}
           </div>
           <div className="col">
             <h2>Mapa google maps</h2>
+            {mapData ? (
+              <CustomGoogleMap
+                googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+                loadingElement={<div style={{ height: `100%` }} />}
+                containerElement={<div style={{ height: `400px` }} />}
+                mapElement={<div style={{ height: `100%` }} />}
+                zoom="2"
+                {...mapData}
+              />
+            ) : (
+              <p>Wybierz lokację, by zobaczyć mapę</p>
+            )}
           </div>
         </div>
       </div>
@@ -76,7 +71,7 @@ const Page = () => {
    * @param {Object<Event>} e
    */
   function onChangeSearcher(e) {
-    setNasaMapLink("");
+    setMapData("");
     const value = e.target.value;
     const selectedItem = options.find((item) => item.display_name === value);
     setSearchValue(value);
@@ -110,8 +105,7 @@ const Page = () => {
     )
       .then((data) => data.json())
       .then((data) => {
-        setIsNasaImageLoader(true);
-        setNasaMapLink(data);
+        setMapData({ ...sercherData, ...data });
       });
   }
 };
